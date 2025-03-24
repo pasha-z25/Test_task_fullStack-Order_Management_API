@@ -1,0 +1,78 @@
+services:
+  web:
+    build: ./web
+    image: next_js
+    container_name: frontend_web
+    ports:
+      - '3000:3000'
+    depends_on:
+      server:
+        condition: service_started
+    networks:
+      - app_network
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./web:/app
+    command: npm run dev
+
+  server:
+    build: ./server
+    image: express_js
+    container_name: backend_server
+    ports:
+      - '8888:8888'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8888']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      db:
+        condition: service_healthy
+      websocket:
+        condition: service_started
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres_db_server
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=admin
+      - DB_NAME=test_db
+    networks:
+      - app_network
+    volumes:
+      - ./server:/app
+    command: npm run docker
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+  db:
+    image: postgres:15
+    container_name: postgres_db_server
+    restart: always
+    stop_grace_period: 30s
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: test_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+    name: local_docker_app_network
+
+volumes:
+  pg_data:

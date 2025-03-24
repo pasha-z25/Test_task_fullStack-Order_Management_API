@@ -1,0 +1,33 @@
+{
+  "name": "server",
+  "description": "",
+  "version": "0.1.0",
+  "author": "Pavlo Zubal pashazubak@gmail.com",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --watch src/**/*.ts --exec tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "seed": "tsx src/db/seed.ts",
+    "docker-dev": "tsx src/index.ts",
+    "docker": "npm run seed && npm run docker-dev",
+    "lint": "npx eslint .",
+    "lint:fix": "npx eslint . --fix"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.13",
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.27.0"
+  }
+}
