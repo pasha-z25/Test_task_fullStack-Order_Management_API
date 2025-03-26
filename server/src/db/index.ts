@@ -25,11 +25,11 @@ export async function initializeDataSource(retries = 5, delay = 5000) {
   for (let i = 0; i < retries; i++) {
     try {
       await AppDataSource.initialize();
-      console.log('Database initialized successfully');
+      console.log('📦 Database initialized successfully');
       return;
     } catch (error: any) {
       console.error(
-        `Failed to initialize database (attempt ${i + 1}/${retries}):`,
+        `🔄 Failed to initialize database (attempt ${i + 1}/${retries}):`,
         error.message
       );
       if (i === retries - 1) throw error;

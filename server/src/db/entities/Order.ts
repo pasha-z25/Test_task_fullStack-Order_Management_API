@@ -41,7 +41,7 @@ export class Order {
   @BeforeInsert()
   async beforeInsertActions() {
     if (!AppDataSource.isInitialized) {
-      throw new Error('AppDataSource is not initialized');
+      throw new Error('❌ AppDataSource is not initialized');
     }
 
     const productRepository = AppDataSource.getRepository(Product);
@@ -53,7 +53,7 @@ export class Order {
     if (product) {
       this.totalPrice = this.quantity * product.price;
     } else {
-      throw new Error(`Product with ID ${this.productId} not found`);
+      throw new Error(`⚠️ Product with ID ${this.productId} not found`);
     }
 
     const user = await userRepository.findOneBy({
@@ -62,13 +62,13 @@ export class Order {
     if (user && this.totalPrice) {
       if (user.balance < this.totalPrice) {
         throw new Error(
-          `Insufficient balance for user ${user.name}. Required: ${this.totalPrice}, Available: ${user.balance}`
+          `⚠️ Insufficient balance for user ${user.name}. Required: ${this.totalPrice}, Available: ${user.balance}`
         );
       }
 
       if (product.stock < this.quantity) {
         throw new Error(
-          `Insufficient stock for product ${product.name}. Available: ${product.stock}, Requested: ${this.quantity}`
+          `⚠️ Insufficient stock for product ${product.name}. Available: ${product.stock}, Requested: ${this.quantity}`
         );
       }
 
@@ -82,7 +82,8 @@ export class Order {
             userRepository.save(user),
             new Promise((_, reject) =>
               setTimeout(
-                () => reject(new Error('User save timed out after 5 seconds')),
+                () =>
+                  reject(new Error('⏱️ User save timed out after 5 seconds')),
                 5000
               )
             ),
@@ -91,7 +92,7 @@ export class Order {
           break;
         } catch (error: any) {
           console.error(
-            `Attempt ${i + 1}/3 to save user failed:`,
+            `🔄 Attempt ${i + 1}/3 to save user failed:`,
             error.message
           );
           if (i === 2) throw error;
@@ -99,7 +100,7 @@ export class Order {
         }
       }
       if (!savedUser) {
-        throw new Error('Failed to save user after 3 attempts');
+        throw new Error('⚠️ Failed to save user after 3 attempts');
       }
 
       let savedProduct = false;
@@ -110,7 +111,9 @@ export class Order {
             new Promise((_, reject) =>
               setTimeout(
                 () =>
-                  reject(new Error('Product save timed out after 5 seconds')),
+                  reject(
+                    new Error('⏱️ Product save timed out after 5 seconds')
+                  ),
                 5000
               )
             ),
@@ -119,7 +122,7 @@ export class Order {
           break;
         } catch (error: any) {
           console.error(
-            `Attempt ${i + 1}/3 to save product failed:`,
+            `🔄 Attempt ${i + 1}/3 to save product failed:`,
             error.message
           );
           if (i === 2) throw error;
@@ -127,11 +130,11 @@ export class Order {
         }
       }
       if (!savedProduct) {
-        throw new Error('Failed to save product after 3 attempts');
+        throw new Error('⚠️ Failed to save product after 3 attempts');
       }
     } else {
       throw new Error(
-        `User with ID ${this.userId} not found or totalPrice not calculated`
+        `⚠️ User with ID ${this.userId} not found or totalPrice not calculated`
       );
     }
   }

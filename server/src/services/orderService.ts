@@ -17,17 +17,17 @@ export class OrderService {
 
     const user = await userRepo.findOneBy({ id: userId });
     if (!user) {
-      throw new Error(`User with ID ${userId} not found`);
+      throw new Error(`⚠️ User with ID ${userId} not found`);
     }
 
     const product = await productRepo.findOneBy({ id: productId });
     if (!product) {
-      throw new Error(`Product with ID ${productId} not found`);
+      throw new Error(`⚠️ Product with ID ${productId} not found`);
     }
 
     if (product.stock < quantity) {
       throw new Error(
-        `Insufficient stock for product ${product.name}. Available: ${product.stock}, Requested: ${quantity}`
+        `⚠️ Insufficient stock for product ${product.name}. Available: ${product.stock}, Requested: ${quantity}`
       );
     }
 
@@ -47,7 +47,7 @@ export class OrderService {
 
     const user = await userRepository.findOneBy({ id: userId });
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('⚠️ User not found');
     }
 
     return await orderRepository.find({

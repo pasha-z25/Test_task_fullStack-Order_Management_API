@@ -1,8 +1,14 @@
 import { OrderService } from '@/services/orderService';
-import { AppDataSource } from '.';
+import { AppDataSource, initializeDataSource } from '.';
 import { Order, Product, User } from './entities';
 
 export async function seedDatabase(clearPrevious?: boolean) {
+  await initializeDataSource();
+
+  if (!AppDataSource.isInitialized) {
+    throw new Error('⚠️ AppDataSource is not initialized');
+  }
+
   const userRepository = AppDataSource.getRepository(User);
   const productRepository = AppDataSource.getRepository(Product);
   const orderRepository = AppDataSource.getRepository(Order);
@@ -34,7 +40,7 @@ export async function seedDatabase(clearPrevious?: boolean) {
   ];
 
   const savedUsers = await userRepository.save(users);
-  console.log('Users created:', savedUsers);
+  console.log('ℹ️ Users created:', savedUsers);
 
   const products = [
     { name: 'Laptop', price: 999.99, stock: 10 },
@@ -45,7 +51,7 @@ export async function seedDatabase(clearPrevious?: boolean) {
   ];
 
   const savedProducts = await productRepository.save(products);
-  console.log('Products created:', savedProducts);
+  console.log('ℹ️ Products created:', savedProducts);
 
   const ordersData = [
     {
@@ -75,17 +81,20 @@ export async function seedDatabase(clearPrevious?: boolean) {
     try {
       const order = await OrderService.createOrder(orderData);
       savedOrders.push(order);
-      console.log(`Order created for user ${order.userId}:`, order);
+      console.log(`ℹ️ Order created for user ${order.userId}:`, order);
     } catch (error: any) {
       console.warn(
-        `Failed to create order for user ${orderData.userId}: ${error.message}`
+        `⚠️ Failed to create order for user ${orderData.userId}: ${error.message}`
       );
     }
   }
 
-  console.log('Orders created:', savedOrders);
+  console.log('ℹ️ Orders created:', savedOrders);
+
+  await AppDataSource.destroy();
 }
 
-// seedDatabase().catch((error) => {
-//   console.error('Error seeding database:', error);
-// });
+seedDatabase().catch((error) => {
+  console.error('❌ Error seeding database:', error);
+  process.exit(1);
+});

@@ -39,7 +39,7 @@ export const addOrder = async (
       data: order,
     });
   } catch (error: any) {
-    logger.error('Error creating order', {
+    logger.error('❌ Error creating order', {
       error: error.message,
       userId,
       productId,
@@ -65,7 +65,10 @@ export const addOrder = async (
   }
 };
 
-export const getOrders = async (req: Request, res: Response): Promise<void> => {
+export const getUserOrders = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { userId } = req.params;
 
   logger.info('GET /orders/:userId', { userId });
@@ -83,7 +86,10 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
       data: orders,
     });
   } catch (error: any) {
-    logger.error('Error retrieving orders', { error: error.message, userId });
+    logger.error('❌ Error retrieving orders', {
+      error: error.message,
+      userId,
+    });
     res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
 };
@@ -106,7 +112,7 @@ export const getAllOrders = async (
       data: orders,
     });
   } catch (error: any) {
-    logger.error('Error retrieving orders', { error: error.message });
+    logger.error('❌ Error retrieving orders', { error: error.message });
     res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
 };

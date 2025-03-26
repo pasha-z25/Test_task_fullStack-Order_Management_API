@@ -4,8 +4,7 @@ import express from 'express';
 import 'express-async-errors';
 import 'reflect-metadata';
 import { initializeDataSource } from './db';
-import { seedDatabase } from './db/seed';
-import { ordersRoutes } from './routes';
+import { ordersRoutes, productsRoutes, usersRoutes } from './routes';
 import { getRequestInfo } from './utils/helpers';
 import logger from './utils/logger';
 
@@ -29,6 +28,8 @@ app.get('/', function (_req, res) {
 });
 
 app.use('/orders', ordersRoutes);
+app.use('/users', usersRoutes);
+app.use('/products', productsRoutes);
 
 app.use((req: express.Request, res: express.Response) => {
   logger.warn('Route not found', { requestInfo: getRequestInfo(req) });
@@ -36,7 +37,7 @@ app.use((req: express.Request, res: express.Response) => {
 });
 
 app.use((err: any, req: express.Request, res: express.Response) => {
-  logger.error('Unhandled error', {
+  logger.error('❌ Unhandled error', {
     error: err.message,
     requestInfo: getRequestInfo(req),
   });
@@ -45,13 +46,7 @@ app.use((err: any, req: express.Request, res: express.Response) => {
 
 initializeDataSource()
   .then(async () => {
-    logger.info('Database connected successfully');
-
-    try {
-      await seedDatabase();
-    } catch (error: any) {
-      logger.error('Error during seeding:', error.message);
-    }
+    logger.info('📦 Database connected successfully');
 
     app.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
@@ -67,6 +62,6 @@ initializeDataSource()
     });
   })
   .catch((error) => {
-    logger.error('Error connecting to database', { error: error.message });
+    logger.error('❌ Error connecting to database', { error: error.message });
     process.exit(1);
   });
