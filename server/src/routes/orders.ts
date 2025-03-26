@@ -6,8 +6,8 @@ const router = Router();
 
 router.post('/', rateLimiter, ordersController.addOrder);
 
-router.get('/:userId', rateLimiter, ordersController.getOrders);
+router.get('/:userId', rateLimiter, ordersController.getUserOrders);
 
-router.get('/', rateLimiter, ordersController.getOrders);
+router.get('/', rateLimiter, ordersController.getAllOrders);
 
 export default router;
