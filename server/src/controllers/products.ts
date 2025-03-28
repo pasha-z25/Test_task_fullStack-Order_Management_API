@@ -9,7 +9,9 @@ export const getAllProducts = async (
   logger.info('GET /products');
 
   try {
-    const products = await ProductService.getAllProducts();
+    const productService = new ProductService();
+
+    const products = await productService.getAllProducts();
 
     logger.info('Products retrieved successfully', {
       productsCount: products.length,
@@ -21,6 +23,9 @@ export const getAllProducts = async (
     });
   } catch (error: any) {
     logger.error('❌ Error retrieving products', { error: error.message });
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Internal server error',
+    });
   }
 };

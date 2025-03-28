@@ -12,8 +12,9 @@
     "emitDecoratorMetadata": true,
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["node", "jest"]
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules"]
 }

@@ -1,6 +1,7 @@
 import { OrderService } from '@/services/orderService';
 import { AppDataSource, initializeDataSource } from '.';
 import { Order, Product, User } from './entities';
+import { getRepository } from './repository';
 
 export async function seedDatabase(clearPrevious?: boolean) {
   await initializeDataSource();
@@ -9,9 +10,9 @@ export async function seedDatabase(clearPrevious?: boolean) {
     throw new Error('⚠️ AppDataSource is not initialized');
   }
 
-  const userRepository = AppDataSource.getRepository(User);
-  const productRepository = AppDataSource.getRepository(Product);
-  const orderRepository = AppDataSource.getRepository(Order);
+  const userRepository = getRepository(User);
+  const productRepository = getRepository(Product);
+  const orderRepository = getRepository(Order);
 
   if (clearPrevious) {
     await userRepository.delete({});
@@ -79,7 +80,8 @@ export async function seedDatabase(clearPrevious?: boolean) {
   const savedOrders = [];
   for (const orderData of ordersData) {
     try {
-      const order = await OrderService.createOrder(orderData);
+      const orderService = new OrderService();
+      const order = await orderService.createOrder(orderData);
       savedOrders.push(order);
       console.log(`ℹ️ Order created for user ${order.userId}:`, order);
     } catch (error: any) {

@@ -22,7 +22,9 @@ export const addOrder = async (
   }
 
   try {
-    const order = await OrderService.createOrder({
+    const orderService = new OrderService();
+
+    const order = await orderService.createOrder({
       userId,
       productId,
       quantity,
@@ -54,7 +56,7 @@ export const addOrder = async (
       return;
     }
     if (error.message.includes('Insufficient stock')) {
-      res.status(400).json({ status: 'error', message: error.message });
+      res.status(403).json({ status: 'error', message: error.message });
       return;
     }
     if (error.message.includes('Insufficient balance')) {
@@ -74,7 +76,9 @@ export const getUserOrders = async (
   logger.info('GET /orders/:userId', { userId });
 
   try {
-    const orders = await OrderService.getOrdersByUserId(userId);
+    const orderService = new OrderService();
+
+    const orders = await orderService.getOrdersByUserId(userId);
 
     logger.info('Orders retrieved successfully', {
       userId,
@@ -90,7 +94,10 @@ export const getUserOrders = async (
       error: error.message,
       userId,
     });
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Internal server error',
+    });
   }
 };
 
@@ -101,7 +108,9 @@ export const getAllOrders = async (
   logger.info('GET /orders');
 
   try {
-    const orders = await OrderService.getAllOrders();
+    const orderService = new OrderService();
+
+    const orders = await orderService.getAllOrders();
 
     logger.info('Orders retrieved successfully', {
       orderCount: orders.length,
@@ -113,6 +122,9 @@ export const getAllOrders = async (
     });
   } catch (error: any) {
     logger.error('❌ Error retrieving orders', { error: error.message });
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Internal server error',
+    });
   }
 };
