@@ -7,7 +7,7 @@ export const rateLimiter = rateLimit({
   keyGenerator: (req: Request) => {
     return (req.params.userId || req.body.userId || 'anonymous').toString();
   },
-  handler: (req: Request, res: Response) => {
+  handler: (_req: Request, res: Response) => {
     res.status(429).json({
       status: 'error',
       message: 'Too many requests, please try again later.',

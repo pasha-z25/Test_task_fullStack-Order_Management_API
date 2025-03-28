@@ -1,5 +1,6 @@
-import { AppDataSource } from '@/db';
 import { Order, Product, User } from '@/db/entities';
+import { getRepository } from '@/db/repository';
+import { Repository } from 'typeorm';
 
 interface OrderData {
   userId: string;
@@ -8,57 +9,118 @@ interface OrderData {
 }
 
 export class OrderService {
-  static async createOrder(orderData: OrderData): Promise<Order> {
+  private orderRepository: Repository<Order> = getRepository(Order);
+  private userRepository: Repository<User> = getRepository(User);
+  private productRepository: Repository<Product> = getRepository(Product);
+
+  async createOrder(orderData: OrderData): Promise<Order> {
     const { userId, productId, quantity } = orderData;
 
-    const orderRepo = AppDataSource.getRepository(Order);
-    const userRepo = AppDataSource.getRepository(User);
-    const productRepo = AppDataSource.getRepository(Product);
-
-    const user = await userRepo.findOneBy({ id: userId });
+    const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) {
-      throw new Error(`⚠️ User with ID ${userId} not found`);
+      throw new Error(`⚠️  User with ID ${userId} not found`);
     }
 
-    const product = await productRepo.findOneBy({ id: productId });
+    const product = await this.productRepository.findOneBy({ id: productId });
     if (!product) {
-      throw new Error(`⚠️ Product with ID ${productId} not found`);
+      throw new Error(`⚠️  Product with ID ${productId} not found`);
+    }
+
+    const totalPrice = quantity * product.price;
+
+    if (user.balance < totalPrice) {
+      throw new Error(
+        `⚠️ Insufficient balance for user ${user.name}. Required: ${totalPrice}, Available: ${user.balance}`
+      );
     }
 
     if (product.stock < quantity) {
       throw new Error(
-        `⚠️ Insufficient stock for product ${product.name}. Available: ${product.stock}, Requested: ${quantity}`
+        `⚠️  Insufficient stock for product ${product.name}. Available: ${product.stock}, Requested: ${quantity}`
       );
     }
 
-    const order = new Order();
-    order.userId = userId;
-    order.productId = productId;
-    order.quantity = quantity;
-    order.user = user;
-    order.product = product;
+    user.balance -= totalPrice;
+    product.stock -= quantity;
 
-    return await orderRepo.save(order);
-  }
-
-  static async getOrdersByUserId(userId: string): Promise<Order[]> {
-    const userRepository = AppDataSource.getRepository(User);
-    const orderRepository = AppDataSource.getRepository(Order);
-
-    const user = await userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new Error('⚠️ User not found');
+    let savedUser = false;
+    for (let i = 0; i < 3; i++) {
+      try {
+        await Promise.race([
+          this.userRepository.save(user),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error('⏱️ User save timed out after 5 seconds')),
+              5000
+            )
+          ),
+        ]);
+        savedUser = true;
+        break;
+      } catch (error: any) {
+        console.error(
+          `🔄 Attempt ${i + 1}/3 to save user failed:`,
+          error.message
+        );
+        if (i === 2) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+    if (!savedUser) {
+      throw new Error('⚠️ Failed to save user after 3 attempts');
     }
 
-    return await orderRepository.find({
+    let savedProduct = false;
+    for (let i = 0; i < 3; i++) {
+      try {
+        await Promise.race([
+          this.productRepository.save(product),
+          new Promise((_, reject) =>
+            setTimeout(
+              () =>
+                reject(new Error('⏱️ Product save timed out after 5 seconds')),
+              5000
+            )
+          ),
+        ]);
+        savedProduct = true;
+        break;
+      } catch (error: any) {
+        console.error(
+          `🔄 Attempt ${i + 1}/3 to save product failed:`,
+          error.message
+        );
+        if (i === 2) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+    if (!savedProduct) {
+      throw new Error('⚠️ Failed to save product after 3 attempts');
+    }
+
+    const order = this.orderRepository.create({
+      userId,
+      productId,
+      quantity,
+      totalPrice,
+    });
+
+    return await this.orderRepository.save(order);
+  }
+
+  async getOrdersByUserId(userId: string): Promise<Order[]> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new Error('⚠️  User not found');
+    }
+
+    return await this.orderRepository.find({
       where: { userId },
       relations: ['user', 'product'],
     });
   }
 
-  static async getAllOrders(): Promise<Order[]> {
-    const orderRepository = AppDataSource.getRepository(Order);
-
-    return await orderRepository.find({ relations: ['user', 'product'] });
+  async getAllOrders(): Promise<Order[]> {
+    return await this.orderRepository.find({ relations: ['user', 'product'] });
   }
 }

@@ -9,7 +9,9 @@ export const getAllUsers = async (
   logger.info('GET /users');
 
   try {
-    const users = await UserService.getAllUsers();
+    const userService = new UserService();
+
+    const users = await userService.getAllUsers();
 
     logger.info('Users retrieved successfully', {
       usersCount: users.length,
@@ -21,7 +23,10 @@ export const getAllUsers = async (
     });
   } catch (error: any) {
     logger.error('❌ Error retrieving users', { error: error.message });
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Internal server error',
+    });
   }
 };
 
@@ -34,7 +39,9 @@ export const getUserById = async (
   logger.info('GET /users/:userId', { userId });
 
   try {
-    const user = await UserService.getUserById(userId);
+    const userService = new UserService();
+
+    const user = await userService.getUserById(userId);
 
     logger.info('Users retrieved successfully', {
       user: user,
@@ -46,6 +53,9 @@ export const getUserById = async (
     });
   } catch (error: any) {
     logger.error('❌ Error retrieving user', { error: error.message });
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Internal server error',
+    });
   }
 };

@@ -1,10 +1,11 @@
-import { AppDataSource } from '@/db';
 import { Product } from '@/db/entities';
+import { getRepository } from '@/db/repository';
+import { Repository } from 'typeorm';
 
 export class ProductService {
-  static async getAllProducts(): Promise<Product[]> {
-    const productRepository = AppDataSource.getRepository(Product);
+  private productRepository: Repository<Product> = getRepository(Product);
 
-    return await productRepository.find();
+  async getAllProducts(): Promise<Product[]> {
+    return await this.productRepository.find();
   }
 }

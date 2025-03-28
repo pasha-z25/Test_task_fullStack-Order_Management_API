@@ -1,17 +1,16 @@
-import { AppDataSource } from '@/db';
 import { User } from '@/db/entities';
+import { getRepository } from '@/db/repository';
+import { Repository } from 'typeorm';
 
 export class UserService {
-  static async getAllUsers(): Promise<User[]> {
-    const userRepository = AppDataSource.getRepository(User);
+  private userRepository: Repository<User> = getRepository(User);
 
-    return await userRepository.find();
+  async getAllUsers(): Promise<User[]> {
+    return await this.userRepository.find();
   }
 
-  static async getUserById(userId: string): Promise<User | null> {
-    const userRepository = AppDataSource.getRepository(User);
-
-    return await userRepository.findOne({
+  async getUserById(userId: string): Promise<User | null> {
+    return await this.userRepository.findOne({
       where: { id: userId },
     });
   }
