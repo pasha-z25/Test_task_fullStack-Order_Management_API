@@ -64,7 +64,7 @@ export default function AddOrder({
         label={'productId'}
         options={products.map((product) => ({
           value: product.id,
-          label: `${product.name} (${getCurrencyValue(product.price)}, ${product.stock})`,
+          label: `${product.name} (${getCurrencyValue(product.price)})`,
         }))}
       />
       <ControlledSelect
