@@ -3,7 +3,7 @@
 import { getCurrencyValue } from '@/utils/helpers';
 import type { Product } from '@/utils/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import {
   NewOrderFormDefaultValues,
   NewOrderFormSchema,
@@ -35,6 +35,23 @@ export default function AddOrder({
     defaultValues: NewOrderFormDefaultValues,
   });
 
+  const selectedProductId = useWatch({
+    control,
+    name: 'productId',
+    defaultValue: NewOrderFormDefaultValues.productId,
+  });
+
+  const selectedProduct = products.find(
+    (product) => product.id === selectedProductId
+  );
+
+  const quantityOptions = selectedProduct
+    ? Array.from({ length: selectedProduct.stock }, (_, i) => ({
+        value: i + 1,
+        label: `${i + 1}`,
+      }))
+    : [{ value: 1, label: '1' }];
+
   const submitHandler = ({ productId, quantity }: NewOrderFormType) => {
     formHandler({ userId, productId, quantity });
   };
@@ -54,11 +71,7 @@ export default function AddOrder({
         control={control}
         name="quantity"
         label={'quantity'}
-        options={[
-          { value: 1, label: '1' },
-          { value: 2, label: '2' },
-          { value: 3, label: '3' },
-        ]}
+        options={quantityOptions}
       />
       <Button type="submit" variant="outlined">
         Save
