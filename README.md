@@ -46,7 +46,7 @@ DB_NAME=mydb_test
 #### 1. Build and start containers:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 - Backend: http://localhost:3000
@@ -56,7 +56,7 @@ docker-compose up --build
 #### 2. Stop:
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Locally
@@ -70,31 +70,19 @@ docker-compose down
   npm install
   ```
 
-- Start PostgreSQL:
-
-  ```bash
-  docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=admin postgres
-  ```
-
 - Run:
 
   ```bash
   npm run dev
   ```
 
-#### 1. Frontend
+#### 2. Frontend
 
 - Install dependencies:
 
   ```bash
   cd web
   npm install
-  ```
-
-- Start PostgreSQL:
-
-  ```bash
-  docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=admin postgres
   ```
 
 - Run:
@@ -108,6 +96,13 @@ docker-compose down
 ## Running Tests
 
 1. Ensure PostgreSQL is running (e.g., from local setup).
+
+- Start PostgreSQL:
+
+  ```bash
+  docker compose db
+  ```
+
 2. Run backend tests:
 
    ```
